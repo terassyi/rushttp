@@ -32,6 +32,7 @@ impl Parser {
         // parse data from tcp stream
         let mut data = String::from_utf8(buf.to_vec())
             .map_err(|_| Error::from(ParseError::new()))?;
+        // println!("{:?}", data);
         let mut request_header_body = data.split("\r\n\r\n");
         let mut request = request_header_body.next().ok_or(Error::from(ParseError::new()))?
             .split("\r\n");
@@ -39,11 +40,14 @@ impl Parser {
         // validate http packet
         let request_line: &str = request.next().unwrap();
         let ver = Version::parse(request_line).map_err(|e| Error::from(e))?;
+        println!("---------------------------------------------");
+        println!("[info] version: {}", ver.format());
         let mut  split_line = request_line.split_whitespace();
         let method = match split_line.next() {
             Some(m) => Method::from_str(m)?,
             None => return Err(Error::from(ParseError::new())),
         };
+        println!("[info] method {}", method.as_str());
         let path = match split_line.next() {
             Some(p) => match Uri::new(p) {
                 Some(uri) => uri,
@@ -51,6 +55,7 @@ impl Parser {
             },
             None => return Err(Error::from(ParseError::new())),
         };
+        println!("[info] path {}", path.path());
         let request_builder = request_builder.method(method)
             .uri(path).version(ver);
 
@@ -58,8 +63,11 @@ impl Parser {
         let mut header = Header::new();
         for line in request {
             header.parse(line)?;
+            println!("[info] header {}", line);
         }
         let request_builder = request_builder.header(header);
+        println!("[info] body {}", body);
+        println!("---------------------------------------------");
         let req = Request::from_parts(request_builder.parts(), body);
         Ok(req)
     }

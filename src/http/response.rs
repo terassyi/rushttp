@@ -75,7 +75,7 @@ impl Response<()> {
     // }
 }
 
-impl <T> Response<T> {
+impl <T: std::fmt::Display> Response<T> {
     pub fn new(body: T) -> Response<T> {
         Response {
             head: Parts::new(),
@@ -104,9 +104,13 @@ impl <T> Response<T> {
         &self.body
     }
 
-    // pub fn format() -> Result<&[u8], ParseError> {
-    //
-    // }
+    pub fn format(&self) -> Result<String, ParseError> {
+        let buf = format!("{} {} {}\r\n", self.version().format(), self.status().to_string(), self.status().name());
+        let headers = self.header().format()?;
+        let buf = format!("{}{}\r\n", buf, headers);
+        Ok(format!("{}{}", buf, self.body()))
+    }
+
 }
 
 impl Parts {
@@ -150,5 +154,20 @@ impl Parts {
             status: self.status,
             header,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_response_format() {
+        let mut h = super::Header::new();
+        h.parse("Content-Type: text/html").unwrap();
+        h.parse("Host: localhost:9999").unwrap();
+        let b = super::Response::builder()
+            .status(super::StatusCode(200))
+            .header(h).empty_response();
+        let b = b.format().unwrap();
+        assert_eq!(b, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nHost: localhost:9999\r\n\r\n".to_string());
     }
 }

@@ -29,7 +29,7 @@ pub struct Server {
     addr: Ipv4Addr,
     port: usize,
     root: PathBuf,
-    handlers: Handlers,
+    handlers: Handlers<String>,
 }
 
 impl Server {
@@ -42,7 +42,7 @@ impl Server {
         }
     }
 
-    pub fn register(&mut self, path: &str, method: &str, handler: fn(Request<String>)) {
+    pub fn register(&mut self, path: &str, method: &str, handler: fn(Request<String>) -> String) {
         let handler = Handler::new((&self.root).to_path_buf(), path, method, handler);
         self.handlers.add(handler);
     }

@@ -4,25 +4,26 @@ use crate::http::method::Method;
 use std::net::{TcpStream, Shutdown};
 use crate::server::error::Error;
 use crate::http::parser::Parser;
-use std::io::Read;
+use std::io::{Read, Write};
 use crate::server::{ServerError, resource};
+use crate::server::response::response;
 
 #[derive(Debug, Clone)]
-pub struct Handler {
+pub struct Handler<T> {
     pub path: PathBuf,
     pub method: Method,
-    pub handler: fn(Request<String>)
+    pub handler: fn(Request<String>) -> T
 }
 
 #[derive(Debug, Clone)]
-pub struct Handlers {
+pub struct Handlers<T> {
     root: PathBuf,
-    inner: Vec<Handler>
+    inner: Vec<Handler<T>>
 }
 
 
-impl Handler {
-    pub fn new(root: PathBuf, path: &str, method: &str, handler: fn(Request<String>)) -> Self {
+impl Handler<String> {
+    pub fn new(root: PathBuf, path: &str, method: &str, handler: fn(Request<String>) -> String) -> Self {
         let path = root.join(Path::new(path));
         let method = Method::from_str(method).unwrap();
         Handler {
@@ -32,7 +33,7 @@ impl Handler {
         }
     }
 
-    fn func(&self) -> fn(Request<String>) {
+    fn func(&self) -> fn(Request<String>) -> String {
         self.handler
     }
 
@@ -41,7 +42,7 @@ impl Handler {
     }
 }
 
-impl Handlers {
+impl Handlers<String> {
     pub fn new(root: &str) -> Self {
         let root = Path::new(root).to_path_buf();
         Handlers {
@@ -50,11 +51,11 @@ impl Handlers {
         }
     }
 
-    pub fn add(&mut self, handler: Handler) {
+    pub fn add(&mut self, handler: Handler<String>) {
         self.inner.push(handler);
     }
 
-    pub fn find(&self, path: &str, method: &str) -> Option<&Handler> {
+    pub fn find(&self, path: &str, method: &str) -> Option<&Handler<String>> {
         let path = self.root.join(Path::new(path));
         let method = match Method::from_str(method) {
             Ok(m) => m,
@@ -73,11 +74,12 @@ impl Handlers {
                     let request = Parser::new().parse_request(&data[..size])?; // should not use unwrap
                     let path = request.uri().path();
                     let method = request.method();
-                    println!("[info] path: {:?}", path);
-                    println!("[info] method: {:?}", request.method().as_str());
+                    // println!("[info] path: {:?}", path);
+                    // println!("[info] method: {:?}", request.method().as_str());
                     // if !resource::validate(self.root.to_str().unwrap(), path) {
                     //     println!("[error] not found requested resource: {}", path);
                     // }
+                    println!("[info] handle request");
                     let handler = match self.find(path, method.as_str()) {
                         Some(f) => f,
                         None => {
@@ -85,7 +87,10 @@ impl Handlers {
                             return Err(Error::from(ServerError::new()));
                         }
                     };
-                    handler.func()(request);
+                    let res_data = handler.func()(request);
+                    let res = response(200, Some(&res_data))?;
+                    println!("[info] response\r\n{}", res);
+                    stream.write(res.as_bytes())?;
                 },
                 Err(e) => {
                     println!("[error] failed to read from stream: because of {:?}", e);
