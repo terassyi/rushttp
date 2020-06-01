@@ -122,7 +122,7 @@ mod tests {
         assert_eq!(req.method().as_str(), "GET");
         assert_eq!(req.version(), &super::Version::HTTP11);
         assert_eq!(req.uri().path(), "/");
-        assert_eq!(req.header().map["User-Agent"], HeaderValue::new("curl/7.54.0".as_bytes()).unwrap());
+        assert_eq!(req.header().map["User-Agent"], "curl/7.54.0".to_string());
         assert_eq!(req.body(), "request body\r\nhoge");
     }
 
@@ -135,7 +135,7 @@ mod tests {
         let res = parser.parse_response(packet).unwrap();
         assert_eq!(res.version(), &super::Version::HTTP11);
         assert_eq!(res.status(), &StatusCode::from_u16(200).unwrap());
-        assert_eq!(res.header().map["Content-Type"], HeaderValue::new("text/html; charset=utf-8".as_bytes()).unwrap());
+        assert_eq!(res.header().map["Content-Type"], "text/html; charset=utf-8".to_string());
         assert_eq!(res.body(), "response body\r\nhogehoge");
     }
 }

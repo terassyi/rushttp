@@ -38,6 +38,16 @@ impl Version {
             None => return Err(InvalidVersion::new()),
         }
     }
+
+    pub fn format(&self) -> &str {
+        match self {
+            Version::HTTP09 => "HTTP/0.9",
+            Version::HTTP10 => "HTTP/1.0",
+            Version::HTTP11 => "HTTP/1.1",
+            Version::HTTP2 => "HTTP/2",
+            Version::HTTP3 => "HTTP/3",
+        }
+    }
 }
 
 impl Default for Version {

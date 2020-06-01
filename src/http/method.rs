@@ -3,7 +3,7 @@ use thiserror::Error;
 use std::error::Error;
 // use std::error::Error;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone)]
 pub enum Method {
     GET,
     POST,

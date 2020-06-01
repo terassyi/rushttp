@@ -1,12 +1,13 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, BinaryHeap};
 use thiserror::Error;
 use std::{fmt, error};
 use regex::Regex;
+use crate::http::parser::ParseError;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Header {
     pub name: Vec<HeaderName>,
-    pub map: HashMap<String, HeaderValue>
+    pub map: HashMap<String, String>
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -34,7 +35,7 @@ impl HeaderName {
     }
 
     // pub fn to_string(&self) -> String {
-    //     (*self).into()
+    //     (self).into()
     // }
 }
 
@@ -49,9 +50,9 @@ impl HeaderValue {
         Ok(HeaderValue(String::from_utf8(value.to_vec()).unwrap()))
     }
 
-    // pub fn to_string(&self) -> String {
-    //     (*self).into()
-    // }
+//     pub fn to_string(&self) -> String {
+//         (self).into()
+//     }
 }
 
 impl From<HeaderValue> for String {
@@ -60,6 +61,27 @@ impl From<HeaderValue> for String {
     }
 }
 
+// impl ToString for HeaderName {
+//     #[inline]
+//     fn to_string(&self) -> String {
+//         String::from(self)
+//     }
+// }
+
+// impl ToString for HeaderValue {
+//     #[inline]
+//     fn to_string(&self) -> String {
+//         String::from(self)
+//     }
+// }
+
+// impl<HeaderValue, String> Into<String> for HeaderValue where String: From<HeaderValue>
+// {
+//     fn into(self) -> String {
+//         String::from(self)
+//     }
+// }
+
 impl Header {
     pub fn new() -> Self {
         Header::default()
@@ -67,7 +89,7 @@ impl Header {
 
     pub fn add(&mut self, key: &str, value: &str) {
         self.name.push(HeaderName(key.to_string()));
-        self.map.entry(key.to_string()).or_insert(HeaderValue(value.to_string()));
+        self.map.entry(key.to_string()).or_insert(value.to_string());
     }
 
     pub fn parse(&mut self, src: &str) -> Result<(), InvalidHeader> {
@@ -80,6 +102,16 @@ impl Header {
         let v: &str = name_value.next().unwrap();
         self.add(n, v);
         Ok(())
+    }
+
+    pub fn format(&self) -> Result<String, ParseError> {
+        let mut headers = String::new();
+        for (name, value) in self.map.iter() {
+            let header = &format!("{}: {}\r\n", name, value);
+            headers = headers + header;
+        }
+        // headers = headers + "\r\n";
+        Ok(headers)
     }
 }
 
@@ -172,12 +204,21 @@ impl fmt::Display for InvalidHeaderValue {
 
 #[cfg(test)]
 mod tests {
+
     #[test]
     fn test_parse() {
         let header = "Host: localhost:18888";
         let mut headers = super::Header::new();
         headers.parse(header).unwrap();
         assert_eq!(headers.name[0], super::HeaderName("Host".to_string()));
-        assert_eq!(headers.map["Host"], super::HeaderValue("localhost:18888".to_string()))
+        assert_eq!(headers.map["Host"], "localhost:18888".to_string());
+    }
+    #[test]
+    fn test_format() {
+        let header = "Host: localhost:18888";
+        let mut headers = super::Header::new();
+        headers.parse(header).unwrap();
+        headers.parse("Content-Type: text/html").unwrap();
+        debug_assert_eq!(headers.format().unwrap(), format!("{}\r\n{}\r\n", header, "Content-Type: text/html"));
     }
 }

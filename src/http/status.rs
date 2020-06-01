@@ -36,6 +36,25 @@ impl StatusCode {
         let num: u16 = (*self).into();
         num.to_string()
     }
+
+    pub fn name(&self) -> &str {
+        match *self {
+            CONTINUE => "CONTINUE",
+            OK => "OK",
+            ACCEPTED => "ACCEPTED",
+            BAD_REQUEST => "BAD_REQUEST",
+            UNAUTHORIZED => "UNAUTHORIZED",
+            FORBIDDEN => "FORBIDDEN",
+            NOT_FOUND => "NOT_FOUND",
+            METHOD_NOT_ALLOWED => "METHOD_NOT_ALLOWED",
+            REQUEST_TIMEOUT => "REQUEST_TIMEOUT",
+            INTERNAL_SERVER_ERROR => "INTERNAL_SERVER_ERROR",
+            NOT_IMPLEMENTED => "NOT_IMPLEMENTED",
+            BAD_GATEWAY => "BAD_GATEWAY",
+            SERVICE_UNAVAILABLE => "SERVICE_UNAVAILABLE",
+            _ => "",
+        }
+    }
 }
 
 impl From<StatusCode> for u16 {
@@ -84,6 +103,10 @@ const INTERNAL_SERVER_ERROR: StatusCode = StatusCode(500);
 const NOT_IMPLEMENTED: StatusCode = StatusCode(501);
 const BAD_GATEWAY: StatusCode = StatusCode(502);
 const SERVICE_UNAVAILABLE: StatusCode = StatusCode(503);
+
+
+
+
 
 
 #[cfg(test)]

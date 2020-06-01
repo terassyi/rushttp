@@ -203,12 +203,12 @@ mod tests {
         let p = super::Parts::new();
         let mut wanted = super::Parts::new();
         let mut maps = HashMap::new();
-        maps.insert("test_header".to_string(), super::HeaderValue("test_value".to_string()));
+        maps.insert("test_header".to_string(), "test_value".to_string());
         wanted.header = super::Header {
             name: vec![super::HeaderName("test_header".to_string())],
             map: maps
         };
         let p = p.push_header("test_header", "test_value");
-        assert_eq!(p.header.map[&"test_header".to_string()], super::HeaderValue("test_value".to_string()));
+        assert_eq!(p.header.map[&"test_header".to_string()], "test_value".to_string());
     }
 }

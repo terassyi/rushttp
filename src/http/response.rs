@@ -3,6 +3,7 @@ use crate::uri::uri::Uri;
 use crate::http::method::Method;
 use crate::http::header::Header;
 use crate::http::status::StatusCode;
+use crate::http::parser::ParseError;
 
 pub struct Response<T> {
     head: Parts,
@@ -48,12 +49,30 @@ impl Builder {
         self.inner
     }
 
+    pub fn empty_response(self) -> Response<String> {
+        Response {
+            head: self.inner,
+            body: "".to_string()
+        }
+    }
+
+    pub fn response<T>(self, body: T) -> Response<T> {
+        Response {
+            head: self.inner,
+            body,
+        }
+    }
 }
 
 impl Response<()> {
     pub fn builder() -> Builder {
         Builder::new()
     }
+
+    // pub fn format(&self) -> Result<&[u8], ParseError> {
+    //     let res = format!("{} {} {}\r\n", self.version().format(), self.status().to_string(), self.status().name());
+    //
+    // }
 }
 
 impl <T> Response<T> {
@@ -84,6 +103,10 @@ impl <T> Response<T> {
     pub fn body(&self) -> &T {
         &self.body
     }
+
+    // pub fn format() -> Result<&[u8], ParseError> {
+    //
+    // }
 }
 
 impl Parts {
