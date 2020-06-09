@@ -13,6 +13,10 @@ use std::io::Read;
 pub mod uri;
 pub mod http;
 
+extern crate chrono;
+extern crate chrono_tz;
+extern crate httpdate;
+
 mod server;
 
 fn main() {

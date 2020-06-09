@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 regex = "1.0"
 thiserror = "1.0"
+chrono = "0.4"
+chrono-tz = "0.4"
+httpdate = "0.3.2"

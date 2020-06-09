@@ -1,8 +1,10 @@
 use std::collections::{HashMap, BinaryHeap};
+use std::time::SystemTime;
 use thiserror::Error;
 use std::{fmt, error};
 use regex::Regex;
 use crate::http::parser::ParseError;
+use httpdate::HttpDate;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Header {
@@ -118,6 +120,17 @@ impl Header {
 pub fn content_length(len: usize) -> String {
     format!("Content-Length: {}", len)
 }
+
+pub fn http_date() -> String {
+    let now = SystemTime::now();
+    let httpdate = HttpDate::from(now).to_string();
+    format!("Date: {}", httpdate)
+}
+
+pub fn accept_ranges() -> String {
+    "Accept-Ranges: bytes".to_string()
+}
+
 
 impl Default for Header {
     fn default() -> Self {
