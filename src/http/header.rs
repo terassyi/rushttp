@@ -115,6 +115,10 @@ impl Header {
     }
 }
 
+pub fn content_length(len: usize) -> String {
+    format!("Content-Length: {}", len)
+}
+
 impl Default for Header {
     fn default() -> Self {
         Header {

@@ -91,6 +91,8 @@ impl Handlers<String> {
                     let res = response(200, Some(&res_data))?;
                     println!("[info] response\r\n{}", res);
                     stream.write(res.as_bytes())?;
+                    println!("[info] write to stream");
+                    return Ok(());
                 },
                 Err(e) => {
                     println!("[error] failed to read from stream: because of {:?}", e);

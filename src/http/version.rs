@@ -21,6 +21,7 @@ impl Version {
     }
 
     pub fn parse(src: &str) -> Result<Self, InvalidVersion> {
+        println!("[info] varsion = {}", src);
         let re = Regex::new("HTTP/\\d(\\.\\d)?").unwrap();
         if !re.is_match(src) {
             return Err(InvalidVersion::new());
