@@ -97,6 +97,7 @@ impl Header {
     pub fn parse(&mut self, src: &str) -> Result<(), InvalidHeader> {
         let re = Regex::new(".*: .*").unwrap();
         if !re.is_match(src) {
+            println!("invalid header name {}", src);
             return Err(InvalidHeader::Name(InvalidHeaderName::new()));
         }
         let mut name_value = src.split(": ");

@@ -20,17 +20,21 @@ extern crate httpdate;
 mod server;
 
 fn main() {
-    let cwd = env::current_dir().unwrap();
-    let cwd = cwd.join(Path::new("src/static/assets/html"));
-    let mut server = Server::new(cwd.to_str().unwrap())
-        .bind(":9999");
+    let args: Vec<String> = env::args().collect();
+    let port = &args[1];
+    // let mut server = Server::new("/etc/static/assets/html")
+    let host = format!(":{}", port);
+    println!("{}", host);
+    // let mut server = Server::new("src/static/assets/html")
+    let mut server = Server::new("/etc/rushttp/static/assets/html")
+        .bind(&host);
     server.register("/", "GET", index_handler);
     server.serve()
 }
 
 fn index_handler(_: Request<String>) -> String {
     let mut buf = [0u8; 256];
-    let mut file = File::open("./src/static/assets/html/index.html").expect("not found");
+    let mut file = File::open("/etc/rushttp/static/assets/html/index.html").expect("not found");
     file.read(&mut buf).expect("failed to read");
     String::from_utf8(buf.to_vec()).unwrap()
 }

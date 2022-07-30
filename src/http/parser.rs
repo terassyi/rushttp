@@ -62,7 +62,10 @@ impl Parser {
         // parse header
         let mut header = Header::new();
         for line in request {
-            header.parse(line)?;
+            match header.parse(line) {
+                Ok(_) => {},
+                Err(e) => println!("[error] {}", e),
+            };
             println!("[info] header {}", line);
         }
         let request_builder = request_builder.header(header);
